@@ -195,6 +195,7 @@ def inv_mix_columns(state):
     return state
 
 
+# НЕПРАВИЛЬНО!
 def key_expansion(key, Nb, Nr):
 
     # формирование пустого массива столбцов
