@@ -144,16 +144,28 @@ def inv_shift_rows(state):
     return state
 
 
+def mul02(x):
+    if x < 0x80:
+        return x << 1
+    return ((x << 1) ^ 0x1b) % 0x100
+
+def mul03(x):
+    return mul02(x) ^ x
+
+def mul09(x):
+    return mul02(mul02(mul02(x))) ^ x
+
+def mul0b(x):
+    return mul02(mul02(mul02(x))) ^ mul02(x) ^ x
+
+def mul0d(x):
+    return mul02(mul02(mul02(x))) ^ mul02(mul02(x)) ^ x
+
+def mul0e(x):
+    return mul02(mul02(mul02(x))) ^ mul02(mul02(x)) ^ mul02(x)
+
+
 def mix_columns(state):
-
-    def mul02(x):
-        if x < 0x80:
-            return (x << 1) % 0x100
-        return ((x << 1) ^ 0x1b) % 0x100
-
-    def mul03(x):
-        return mul02(x) ^ x
-
     for i in range(len(state[0])):
         s0 = mul02(state[0][i]) ^ mul03(state[1][i]) ^ state[2][i] ^ state[3][i]
         s1 = state[0][i] ^ mul02(state[1][i]) ^ mul03(state[2][i]) ^ state[3][i]
@@ -169,24 +181,6 @@ def mix_columns(state):
 
 
 def inv_mix_columns(state):
-
-    def mul02(x):
-        if x < 0x80:
-            return x << 1
-        return ((x << 1) ^ 0x1b) % 0x100
-
-    def mul09(x):
-        return mul02(mul02(mul02(x))) ^ x
-
-    def mul0b(x):
-        return mul02(mul02(mul02(x))) ^ mul02(x) ^ x
-
-    def mul0d(x):
-        return mul02(mul02(mul02(x))) ^ mul02(mul02(x)) ^ x
-
-    def mul0e(x):
-        return mul02(mul02(mul02(x))) ^ mul02(mul02(x)) ^ mul02(x)
-
     for i in range(len(state[0])):
         s0 = mul0e(state[0][i]) ^ mul0b(state[1][i]) ^ mul0d(state[2][i]) ^ mul09(state[3][i])
         s1 = mul09(state[0][i]) ^ mul0e(state[1][i]) ^ mul0b(state[2][i]) ^ mul0d(state[3][i])
@@ -212,7 +206,7 @@ def key_expansion(key, Nb, Nr):
     for i in range(len(key)):
         keySchedule[int(i / 4)][i % 4] = key[i]
 
-    # дозаполнение keyShaldure
+    # дозаполнение keySheldure
     for i in range(Nb, Nb * (Nr + 1)):
         if i % 4 == 0:
             keySchedule[i] = [keySchedule[i - 1][(j + 1) % 4] for j in range(4)]
